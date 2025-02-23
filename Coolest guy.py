@@ -290,7 +290,7 @@ def findBasket():
     limeCheck = vision.largest_object()
     vision.take_snapshot(Vision__ORANGE_FRUIT)
     orangeCheck = vision.largest_object()
-    if(largestFruit == 1 and basket.originX + basket.width == lemonCheck.originX):
+    if(largestFruit == 1 and basket.originX + basket.width - lemonCheck.originX < 10 ):
         targetX = 150
         error = targetX-lemonCheck.originX
         kp = .5
@@ -299,7 +299,7 @@ def findBasket():
         if(error < 5):
             hDriveMotor.stop
             robotstate = ROBOT_DROP_OFF
-    if(largestFruit == 2 and basket.originX + basket.width == limeCheck.originX):
+    if(largestFruit == 2 and basket.originX + basket.width - limeCheck.originX < 10):
         targetX = 150
         error = targetX-limeCheck.originX
         kp = .5
@@ -308,7 +308,7 @@ def findBasket():
         if(error < 5):
             hDriveMotor.stop
             robotstate = ROBOT_DROP_OFF
-        if(largestFruit == 3 and basket.originX + basket.width == orangeCheck.originX):
+        if(largestFruit == 3 and basket.originX + basket.width - orangeCheck.originX < 10):
             targetX = 150
             error = targetX-orangeCheck.originX
             kp = .5
