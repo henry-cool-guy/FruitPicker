@@ -23,11 +23,11 @@ controller = Controller()
 # Saturday signatures
 Vision__LEMON = Signature (1, 2331, 3021, 2676, -4071, -3545, -3808, 2.5, 0)
 Vision__LIME = Signature (2, -6751, -4967, -5859, -4243, -3277, -3760, 2.5, 0)
-Vision__ORANGE_FRUIT = Signature (3, 7405, 8391, 7898, -2427, -2057, -2242, 2.5, 0)
+Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
 Vision__PINK_BASKET = Signature (4, 5293, 5663, 5478, 1335, 1639, 1487, 2.5, 0)
 
 
-vision = Vision(Ports.PORT2, 50, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
+vision = Vision(Ports.PORT3, 50, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
 
 rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
@@ -36,6 +36,8 @@ hDriveMotor = Motor(Ports.PORT15, GearSetting.RATIO_18_1, True)
 horizontalMotor = Motor(Ports.PORT17, GearSetting.RATIO_18_1)
 verticalMotor = Motor(Ports.PORT10, GearSetting.RATIO_18_1)
 basketMotor = Motor(Ports.PORT12, GearSetting.RATIO_18_1)
+
+hDriveMotor.set_stopping(COAST)
 
 frontLine = Line(brain.three_wire_port.e)
 backLine = Line(brain.three_wire_port.f)
@@ -160,7 +162,7 @@ def center_fruit():
     elif(largestFruit == 3): vision.take_snapshot(Vision__ORANGE_FRUIT)
 
     idealx = 150
-    idealy = 140
+    idealy = 150
 
 
     largest = vision.largest_object()
@@ -175,8 +177,8 @@ def center_fruit():
 
     errorx = idealx-cx
     errory = idealy-cy
-    kx = .75
-    ky = .75
+    kx = 1
+    ky = 1
     effortx = kx*errorx
     efforty = ky*errory
 
@@ -247,11 +249,11 @@ def findLine():
 
 def handleLine():
     global robotstate
-    leftref = frontLine.reflectivity()
-    rightref = backLine.reflectivity()
+    frontref = frontLine.reflectivity()
+    backref = backLine.reflectivity()
 
-    referror = leftref-rightref
-    kr = .4
+    referror = frontref-backref - 3
+    kr = .2
     refeffort = kr*referror
 
     print(hDriveMotor.power())
@@ -261,21 +263,22 @@ def handleLine():
     leftMotor.spin(FORWARD, -refeffort)
     rightMotor.spin(FORWARD, refeffort)
 
-    if(leftref > 40 and rightref > 40):
+    if(frontref > 60 and backref > 60):
         hDriveMotor.stop()
-        leftMotor.spin_for(REVERSE, 4.25, TURNS, 60, RPM, wait = False)
-        rightMotor.spin_for(FORWARD, 4.25, TURNS, 60, RPM, wait = True)
+        leftMotor.spin_for(REVERSE, 4.5, TURNS, 60, RPM, wait = False)
+        rightMotor.spin_for(FORWARD, 4.5, TURNS, 60, RPM, wait = True)
         hDriveMotor.spin_for(FORWARD, .5, TURNS, 30, RPM, wait = True)
     if(leftButton.pressing() == True):
+        # untested hdrive turn amount
+        hDriveMotor.spin_for(REVERSE, 1, TURNS, 60, RPM, wait = True)
+        leftMotor.spin_for(FORWARD, 4.25, TURNS, 60, RPM, wait = False)
+        rightMotor.spin_for(REVERSE, 4.25, TURNS, 60, RPM, wait = True)
         robotstate = ROBOT_BASKET
 
 
 def findBasket():
     global robotstate
     global largestFruit
-
-    leftMotor.spin_for(FORWARD, 5, TURNS, 40, RPM, wait = False)
-    rightMotor.spin_for(FORWARD, 5, TURNS, 40, RPM,  wait = True)
 
     verticalMotor.spin_for(FORWARD, verticalMotor.position(), DEGREES, 20, RPM, wait = False)
 
@@ -290,7 +293,7 @@ def findBasket():
     limeCheck = vision.largest_object()
     vision.take_snapshot(Vision__ORANGE_FRUIT)
     orangeCheck = vision.largest_object()
-    if(largestFruit == 1 and basket.originX + basket.width - lemonCheck.originX < 10 ):
+    if(largestFruit == 1 and basket.originX + basket.width - lemonCheck.originX < 10):
         targetX = 150
         error = targetX-lemonCheck.originX
         kp = .5
@@ -318,6 +321,7 @@ def findBasket():
             hDriveMotor.stop
             robotstate = ROBOT_DROP_OFF
         
+
 def dropFruit():
     global robotstate
     rightMotor.spin(FORWARD, 20, RPM)
@@ -330,8 +334,7 @@ def dropFruit():
             basketMotor.stop()
             wait(2000, MSEC)
             basketMotor.spin_for(REVERSE,360,100,RPM, wait = False)
-    
-hDriveMotor.set_stopping(COAST)
+
 
 while True:
     if(robotstate == ROBOT_IDLE): handleIdle()
@@ -341,5 +344,8 @@ while True:
     if(robotstate == ROBOT_PICKING): handlePick()
     if(robotstate == ROBOT_FIND_LINE): findLine()
     if(robotstate == ROBOT_LINING): handleLine()
-    if(robotstate == ROBOT_BASKET): findBasket()
+    if(robotstate == ROBOT_BASKET):
+        print("yoppee")
+        robotstate = ROBOT_IDLE
+        # findBasket()
     if(robotstate == ROBOT_DROP_OFF): dropFruit()  
