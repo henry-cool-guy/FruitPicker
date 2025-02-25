@@ -1,3 +1,14 @@
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+# 	Module:       main.py                                                      #
+# 	Author:       johnm                                                        #
+# 	Created:      2/25/2025, 4:23:53 PM                                        #
+# 	Description:  V5 project                                                   #
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
+# Library impor
+
 from vex import *
 
 brain=Brain()
@@ -10,7 +21,7 @@ Vision__LIME = Signature (2, -6751, -4967, -5859, -4243, -3277, -3760, 2.5, 0)
 Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
 Vision__PINK_BASKET = Signature (4, 1629, 2133, 1881, 1031, 1391, 1211, 2.5, 0)
 
-vision = Vision(Ports.PORT3, 40, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
+vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
 
 rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
@@ -210,7 +221,7 @@ def handlePick():
     leftMotor.spin_for(FORWARD, 1, TURNS, 40, RPM, wait = False)
     rightMotor.spin_for(FORWARD, 1, TURNS, 40, RPM, wait = True)
 
-    verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 200, RPM, wait = True)
+    verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 100, RPM, wait = True)
 
     robotstate = ROBOT_FIND_LINE
 
@@ -240,7 +251,7 @@ def handleLine():
     frontref = frontLine.reflectivity()
     backref = backLine.reflectivity()
 
-    referror = frontref-backref - 3
+    referror = frontref-backref - 4
     kr = .2
     refeffort = kr*referror
 
@@ -303,15 +314,15 @@ def dropFruit():
     if(vision.take_snapshot(Vision__PINK_BASKET) is None):
         print("no basket?")
         #Untested turn amount
-        rightMotor.spin_for(FORWARD, 7, TURNS, 100, RPM, wait = False)
-        leftMotor.spin_for(FORWARD, 7, TURNS, 100, RPM, wait = True)
+        rightMotor.spin_for(FORWARD, 10, TURNS, 100, RPM, wait = False)
+        leftMotor.spin_for(FORWARD, 10, TURNS, 100, RPM, wait = True)
         basketMotor.set_stopping(BRAKE)
         print("dropping off")
         basketMotor.spin(FORWARD, 75, RPM)
         sleep(2000)
         basketMotor.stop()
         wait(2000, MSEC)
-        basketMotor.spin_for(REVERSE, .4, TURNS, 75, RPM, wait = True)
+        basketMotor.spin_for(REVERSE, .4, TURNS, 45, RPM, wait = True)
         basketMotor.set_stopping(COAST)
         robotstate = ROBOT_IDLE
 
