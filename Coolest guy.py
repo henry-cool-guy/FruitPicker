@@ -9,6 +9,7 @@ Vision__LEMON = Signature (1, 2331, 3021, 2676, -4071, -3545, -3808, 2.5, 0)
 Vision__LIME = Signature (2, -6751, -4967, -5859, -4243, -3277, -3760, 2.5, 0)
 Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
 Vision__PINK_BASKET = Signature (4, 1629, 2133, 1881, 1031, 1391, 1211, 2.5, 0)
+Vision__NEW_PINK_BASKET = Signature (6, 5461, 6161, 5811, 869, 1537, 1203, 2.5, 0)
 
 vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
