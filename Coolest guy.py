@@ -1,14 +1,3 @@
-# ---------------------------------------------------------------------------- #
-#                                                                              #
-# 	Module:       main.py                                                      #
-# 	Author:       johnm                                                        #
-# 	Created:      2/25/2025, 4:23:53 PM                                        #
-# 	Description:  V5 project                                                   #
-#                                                                              #
-# ---------------------------------------------------------------------------- #
-
-# Library impor
-
 from vex import *
 
 brain=Brain()
@@ -35,8 +24,6 @@ hDriveMotor.set_stopping(COAST)
 
 frontLine = Line(brain.three_wire_port.e)
 backLine = Line(brain.three_wire_port.f)
-# FAKE PORTS, FIX LATER
-leftButton = Bumper(brain.three_wire_port.c)
 
 ROBOT_IDLE = 0
 ROBOT_SEARCHING = 1
@@ -222,6 +209,7 @@ def handlePick():
     rightMotor.spin_for(FORWARD, 1, TURNS, 40, RPM, wait = True)
 
     verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 100, RPM, wait = True)
+    horizontalMotor.spin_for(REVERSE, horizontalMotor.position(), DEGREES, 100, RPM, wait = True)
 
     robotstate = ROBOT_FIND_LINE
 
@@ -239,10 +227,6 @@ def findLine():
     # Future us problem: what if at no line area
 
 
-    #re-center picker camera
-    horizontalMotor.spin_for(FORWARD, horizontalMotor.position(), DEGREES, 20, RPM, wait = False)
-    verticalMotor.spin_for(FORWARD, verticalMotor.position(), DEGREES, 20, RPM, wait = False)
-
 def handleLine():
     print("lining")
     global robotstate
@@ -258,10 +242,6 @@ def handleLine():
     # print(hDriveMotor.power())
     # print(hDriveMotor.torque())
 
-    # #hDriveMotor.spin(FORWARD, 25)
-    # leftMotor.spin(FORWARD, -refeffort)
-    # rightMotor.spin(FORWARD, refeffort)
-    #TEMP
     hDriveMotor.spin(REVERSE, 25)
     leftMotor.spin(FORWARD, refeffort)
     rightMotor.spin(FORWARD, -refeffort)
@@ -295,15 +275,12 @@ def handleLine():
             hDriveMotor.stop()
         # if (largestFruit == 1 and basket.originX + basket.width - lemonCheck < 10
         #       and abs(lemonCheck - 150) < 10):
-        #     # robotstate = ROBOT_BASKET
         #     robotstate = ROBOT_DROP_OFF
         # elif (largestFruit == 2 and basket.originX + basket.width - limeCheck < 10 
         #       and abs(limeCheck - 150) < 10):
-        #     # robotstate = ROBOT_BASKET
         #     robotstate = ROBOT_DROP_OFF
         # elif (largestFruit == 3 and basket.originX + basket.width - orangeCheck < 10 
         #       and abs(orangeCheck - 150) < 10):
-            # robotstate = ROBOT_BASKET
             robotstate = ROBOT_DROP_OFF
         
 
