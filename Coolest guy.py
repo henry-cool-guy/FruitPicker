@@ -8,9 +8,9 @@ controller = Controller()
 Vision__LEMON = Signature (1, 2331, 3021, 2676, -4071, -3545, -3808, 2.5, 0)
 Vision__LIME = Signature (2, -6751, -4967, -5859, -4243, -3277, -3760, 2.5, 0)
 Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
-Vision__PINK_BASKET = Signature (4, 4333, 4819, 4576, 885, 1199, 1042, 2.500, 0) #(4, 1629, 2133, 1881, 1031, 1391, 1211, 2.5, 0)
+Vision__PINK_BASKET = Signature (4, 5199, 5981, 5590, -445, 263, -91, 2.5, 0) 
 
-vision = Vision(Ports.PORT3, 40, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
+vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
 
 rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
@@ -55,9 +55,8 @@ def handleL1():
         robotstate = ROBOT_IDLE
         print("idle")
     else:
-        robotstate = ROBOT_DROP_OFF
-        # robotstate = ROBOT_SEARCHING
-        # print("searching")
+        robotstate = ROBOT_SEARCHING
+        print("searching")
        
 controller.buttonL1.pressed(handleL1)
 
@@ -247,7 +246,7 @@ def handleLine():
     leftMotor.spin(FORWARD, refeffort)
     rightMotor.spin(FORWARD, -refeffort)
 
-    if(frontref > 30 and backref > 30):
+    if(frontref > 25 and backref > 25):
         hDriveMotor.stop()
         leftMotor.spin_for(REVERSE, 4.5, TURNS, 60, RPM, wait = False)
         rightMotor.spin_for(FORWARD, 4.5, TURNS, 60, RPM, wait = True)
@@ -276,13 +275,11 @@ def dropFruit():
     if(vision.take_snapshot(Vision__PINK_BASKET) is None):
         print("no basket?")
         #Untested turn amount
-        rightMotor.spin_for(FORWARD, 8, TURNS, 100, RPM, wait = False)
-        leftMotor.spin_for(FORWARD, 8, TURNS, 100, RPM, wait = True)
+        rightMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = False)
+        leftMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = True)
         basketMotor.set_stopping(BRAKE)
         print("dropping off")
         basketMotor.spin(FORWARD, 75, RPM)
-        print(basketMotor.power())
-        print(basketMotor.torque())
         wait(2000)
         basketMotor.stop()
         wait(2000, MSEC)
