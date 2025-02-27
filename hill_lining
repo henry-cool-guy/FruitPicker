@@ -1,0 +1,99 @@
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+# 	Module:       main.py                                                      #
+# 	Author:       sofiamccarty                                                 #
+# 	Created:      2/26/2025, 11:58:52 AM                                       #
+# 	Description:  V5 project                                                   #
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
+from vex import *
+
+brain=Brain()
+
+controller = Controller()
+
+
+Vision__LEMON = Signature (1, 2331, 3021, 2676, -4071, -3545, -3808, 2.5, 0)
+Vision__LIME = Signature (2, -6751, -4967, -5859, -4243, -3277, -3760, 2.5, 0)
+Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
+Vision__PINK_BASKET = Signature (4, 1629, 2133, 1881, 1031, 1391, 1211, 2.5, 0)
+Vision__NEW_PINK_BASKET = Signature (6, 5461, 6161, 5811, 869, 1537, 1203, 2.5, 0)
+
+vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
+
+
+rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
+leftMotor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, True)
+hDriveMotor = Motor(Ports.PORT15, GearSetting.RATIO_18_1, True)
+horizontalMotor = Motor(Ports.PORT17, GearSetting.RATIO_18_1)
+verticalMotor = Motor(Ports.PORT10, GearSetting.RATIO_18_1)
+basketMotor = Motor(Ports.PORT12, GearSetting.RATIO_18_1)
+frontLine = Line(brain.three_wire_port.e)
+backLine = Line(brain.three_wire_port.f)
+
+hDriveMotor.set_stopping(COAST)
+
+ROBOT_IDLE = 0
+ROBOT_FIND_LINE = 1
+ROBOT_LINE_HILL = 2
+
+robotstate = ROBOT_IDLE
+
+def handleIdle():
+    rightMotor.stop()
+    leftMotor.stop()
+    verticalMotor.stop()
+    horizontalMotor.stop()
+    basketMotor.stop()
+    hDriveMotor.stop()
+
+
+def findLine():
+    global robotstate
+    leftMotor.spin(FORWARD, 150, RPM)
+    rightMotor.spin(FORWARD, 150, RPM)
+    if (backLine.reflectivity() > 25):
+        robotstate = ROBOT_LINE_HILL
+        print("found the line")
+        rightMotor.stop()
+        leftMotor.stop()
+
+def lineHill():
+    global robotstate
+    print("lining the hill")
+    backRef = backLine.reflectivity()
+    error = 30 - backRef
+    kr = .8
+    effort = kr * error
+    leftMotor.spin(FORWARD, 150 + effort)
+    rightMotor.spin(FORWARD, 150 - effort)
+    if(backLine.reflectivity() < 7):
+        robotstate = ROBOT_IDLE
+        print("I'm idle now")
+    
+def handleL1():
+    global robotstate
+    print(backLine.reflectivity())
+    print("button L1")
+
+    horizontalMotor.reset_position()
+
+    if(robotstate != ROBOT_IDLE):
+        leftMotor.stop()
+        rightMotor.stop()
+        horizontalMotor.stop()
+        verticalMotor.stop()
+        hDriveMotor.stop()
+        robotstate = ROBOT_IDLE
+        print("idle")
+    else:
+        robotstate = ROBOT_FIND_LINE
+
+
+controller.buttonL1.pressed(handleL1)
+
+while True:
+    if(robotstate == ROBOT_IDLE): handleIdle()
+    if(robotstate == ROBOT_FIND_LINE): findLine()
+    if(robotstate == ROBOT_LINE_HILL): lineHill()
