@@ -25,7 +25,7 @@ vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRU
 
 rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
 leftMotor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, True)
-hDriveMotor = Motor(Ports.PORT15, GearSetting.RATIO_18_1, True)
+hDriveMotor = Motor(Ports.PORT16, GearSetting.RATIO_18_1, True)
 horizontalMotor = Motor(Ports.PORT17, GearSetting.RATIO_18_1)
 verticalMotor = Motor(Ports.PORT10, GearSetting.RATIO_18_1)
 basketMotor = Motor(Ports.PORT12, GearSetting.RATIO_18_1)
@@ -37,6 +37,9 @@ hDriveMotor.set_stopping(COAST)
 ROBOT_IDLE = 0
 ROBOT_FIND_LINE = 1
 ROBOT_LINE_HILL = 2
+ROBOT_FIND_ORCHARD = 3
+ROBOT_LINE_ORCHARD = 4
+ROBOT_WAIT = 5
 
 robotstate = ROBOT_IDLE
 
@@ -53,7 +56,7 @@ def findLine():
     global robotstate
     leftMotor.spin(FORWARD, 150, RPM)
     rightMotor.spin(FORWARD, 150, RPM)
-    if (backLine.reflectivity() > 25):
+    if (backLine.reflectivity() > 37):
         robotstate = ROBOT_LINE_HILL
         print("found the line")
         rightMotor.stop()
@@ -63,18 +66,57 @@ def lineHill():
     global robotstate
     print("lining the hill")
     backRef = backLine.reflectivity()
-    error = 30 - backRef
-    kr = .8
+    error = 37 - backRef
+    kr = .35
     effort = kr * error
     leftMotor.spin(FORWARD, 150 + effort)
     rightMotor.spin(FORWARD, 150 - effort)
-    if(backLine.reflectivity() < 7):
-        robotstate = ROBOT_IDLE
-        print("I'm idle now")
+    if(frontLine.reflectivity() < 7):
+        rightMotor.stop()
+        leftMotor.stop()
+        hDriveMotor.spin_for(FORWARD, 15, TURNS, 100, RPM, wait = True)
+        robotstate = ROBOT_FIND_ORCHARD
+        print("finding the line")
+
+# def waitFor():
+#     print("hdrive spin")
+#     global robotstate
+#     hDriveMotor.spin_for(FORWARD, 5, TURNS, 50, RPM, wait = False)
+#     robotstate = ROBOT_FIND_ORCHARD
+
+def findOrchard():
+    print("backing up")
+    global robotstate
+    leftMotor.spin(REVERSE, 50, RPM)
+    rightMotor.spin(REVERSE, 50, RPM)
+    if (backLine.reflectivity() > 25):
+        robotstate = ROBOT_LINE_ORCHARD
+        print("found line")
     
+def lineOrchard():
+    global robotstate
+    print("following line")
+    frontref = frontLine.reflectivity()
+    backref = backLine.reflectivity()
+
+    referror = frontref-backref - 4
+    kr = .4
+    refeffort = kr*referror
+
+    hDriveMotor.spin(FORWARD, 100)
+    leftMotor.spin(FORWARD, -refeffort)
+    rightMotor.spin(FORWARD, refeffort)
+
+    if(frontref > 30 and backref > 30):
+        hDriveMotor.stop()
+        leftMotor.spin_for(REVERSE, 4.5, TURNS, 60, RPM, wait = False)
+        rightMotor.spin_for(FORWARD, 4.5, TURNS, 60, RPM, wait = True)
+        hDriveMotor.spin_for(FORWARD, .5, TURNS, 30, RPM, wait = True)
+
 def handleL1():
     global robotstate
     print(backLine.reflectivity())
+    print(frontLine.reflectivity())
     print("button L1")
 
     horizontalMotor.reset_position()
@@ -97,3 +139,8 @@ while True:
     if(robotstate == ROBOT_IDLE): handleIdle()
     if(robotstate == ROBOT_FIND_LINE): findLine()
     if(robotstate == ROBOT_LINE_HILL): lineHill()
+    if(robotstate == ROBOT_WAIT): print("yoppee")#waitFor()
+    if(robotstate == ROBOT_FIND_ORCHARD) : findOrchard()
+    if(robotstate == ROBOT_LINE_ORCHARD): lineOrchard()
+
+
