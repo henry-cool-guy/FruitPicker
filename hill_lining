@@ -39,7 +39,6 @@ ROBOT_FIND_LINE = 1
 ROBOT_LINE_HILL = 2
 ROBOT_FIND_ORCHARD = 3
 ROBOT_LINE_ORCHARD = 4
-ROBOT_WAIT = 5
 
 robotstate = ROBOT_IDLE
 
@@ -74,15 +73,11 @@ def lineHill():
     if(frontLine.reflectivity() < 7):
         rightMotor.stop()
         leftMotor.stop()
-        hDriveMotor.spin_for(FORWARD, 15, TURNS, 100, RPM, wait = True)
+        hDriveMotor.spin_for(FORWARD, 10, TURNS, 100, RPM, wait = True)
         robotstate = ROBOT_FIND_ORCHARD
         print("finding the line")
 
-# def waitFor():
-#     print("hdrive spin")
-#     global robotstate
-#     hDriveMotor.spin_for(FORWARD, 5, TURNS, 50, RPM, wait = False)
-#     robotstate = ROBOT_FIND_ORCHARD
+
 
 def findOrchard():
     print("backing up")
@@ -100,7 +95,7 @@ def lineOrchard():
     backref = backLine.reflectivity()
 
     referror = frontref-backref - 4
-    kr = .4
+    kr = .35
     refeffort = kr*referror
 
     hDriveMotor.spin(FORWARD, 100)
@@ -139,7 +134,6 @@ while True:
     if(robotstate == ROBOT_IDLE): handleIdle()
     if(robotstate == ROBOT_FIND_LINE): findLine()
     if(robotstate == ROBOT_LINE_HILL): lineHill()
-    if(robotstate == ROBOT_WAIT): print("yoppee")#waitFor()
     if(robotstate == ROBOT_FIND_ORCHARD) : findOrchard()
     if(robotstate == ROBOT_LINE_ORCHARD): lineOrchard()
 
