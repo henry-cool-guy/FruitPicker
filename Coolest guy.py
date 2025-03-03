@@ -63,8 +63,6 @@ def handleL1():
     else:
         pickCount = 0
         robotstate = ROBOT_FIND_HILL
-        #TEMP
-        fruitpick = 2
        
 controller.buttonL1.pressed(handleL1)
 
@@ -175,7 +173,7 @@ def handleSearch():
         return 3
     else: 
         print("retrying")
-        verticalMotor.spin_for(REVERSE, .3, TURNS, 150, RPM, wait = True)
+        verticalMotor.spin_for(REVERSE, .3, TURNS, 100, RPM, wait = True)
         return 0
 
 
@@ -265,8 +263,7 @@ def findLine():
         leftMotor.stop()
         if(pickCount == 2):
             pickCount = 0
-            #robotstate = ROBOT_LINING
-            robotstate = ROBOT_IDLE
+            robotstate = ROBOT_LINING
         else:
             hDriveMotor.spin_for(FORWARD, 5, TURNS, 75, RPM, wait = True)
             print("fruit 2")
@@ -314,7 +311,6 @@ def dropFruit():
     leftMotor.spin(FORWARD, 100, RPM)
     if(vision.take_snapshot(Vision__PINK_BASKET) is None):
         print("no basket?")
-        #Untested turn amount
         rightMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = False)
         leftMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = True)
         basketMotor.set_stopping(BRAKE)
@@ -337,10 +333,8 @@ def linetofruit():
     global Lineconstant
     global fruitpick
 
-    # if(fruitpick == 1): Lineconstant = -1
-    # else: Lineconstant = 1
-
-    Lineconstant = 1
+    if(fruitpick == 1): Lineconstant = -1
+    else: Lineconstant = 1
 
     frontref = frontLine.reflectivity()
     backref = backLine.reflectivity()
