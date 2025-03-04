@@ -4,10 +4,11 @@ brain=Brain()
 
 controller = Controller()
 
-Vision__LEMON = Signature (1, 1709, 2161, 1936, -3907, -3711, -3808, 3.6, 0)
-Vision__LIME = Signature (2, -5871, -5593, -5732, -3923, -3545, -3734, 4.5, 0)
-Vision__ORANGE_FRUIT = Signature (3, 7893, 8955, 8424, -2059, -1481, -1770, 4.1, 0)
-Vision__PINK_BASKET = Signature (4, 4839, 5083, 4961, 661, 991, 826, 3, 0) 
+Vision__LEMON = Signature (1, 913, 2291, 1602, -4155, -3851, -4003, 2.5, 0)
+Vision__LIME = Signature (2, -6109, -5663, -5886, -4007, -3507, -3757, 2.5, 0)
+Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
+Vision__PINK_BASKET = Signature (4, 3647, 4317, 3982, 885, 1253, 1069, 3.7, 0)
+
 
 vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
@@ -63,8 +64,9 @@ def handleL1():
         print("idle")
     else:
         pickCount = 0
-        fruitpick = 3
-        robotstate = ROBOT_FIND_TREE
+        fruitpick = 2
+        robotstate = ROBOT_DROP_OFF
+        # robotstate = ROBOT_LINING
         # robotstate = ROBOT_FIND_HILL
        
 controller.buttonL1.pressed(handleL1)
@@ -120,45 +122,21 @@ def handleSearch():
     if(vision.take_snapshot(Vision__LEMON)):
         print("lemon?")
         lemonheight = vision.largest_object().height
-        # if(vision.largest_object().originY < 5):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM, wait = True)
-        #     vision.take_snapshot(Vision__LEMON)
-        #     lemonheight = vision.largest_object().height
-        # if(vision.largest_object().originY + lemonheight > 195):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM,wait = True)
-        #     vision.take_snapshot(Vision__LEMON)
-        #     lemonheight = vision.largest_object().height
-        if(lemonheight < 45):
+        if(lemonheight < 40):
             lemonheight = 0
     else: lemonheight = 0
 
     if(vision.take_snapshot(Vision__ORANGE_FRUIT)):
         print("orange?")
         orangeheight = vision.largest_object().height
-        # if(vision.largest_object().originY < 5):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM, wait = True)
-        #     vision.take_snapshot(Vision__ORANGE_FRUIT)
-        #     orangeheight = vision.largest_object().height
-        # if(vision.largest_object().originY + orangeheight > 195):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM, wait = True)
-        #     vision.take_snapshot(Vision__ORANGE_FRUIT)
-        #     orangeheight = vision.largest_object().height
-        if(orangeheight < 45):
+        if(orangeheight < 40):
             orangeheight = 0
     else: orangeheight = 0
 
     if(vision.take_snapshot(Vision__LIME)):
         print("lime?")
         limeheight = vision.largest_object().height
-        # if(vision.largest_object().originY < 5):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM, wait = True)
-        #     vision.take_snapshot(Vision__LIME)
-        #     limeheight = vision.largest_object().height
-        # if(vision.largest_object().originY + limeheight > 195):
-        #     verticalMotor.spin_for(REVERSE, .25, TURNS, 40, RPM, wait = True)
-        #     vision.take_snapshot(Vision__LIME)
-        #     limeheight = vision.largest_object().height
-        if(limeheight < 45):
+        if(limeheight < 40):
             limeheight = 0
     else: limeheight = 0
 
@@ -188,8 +166,8 @@ def center_fruit():
     elif(largestFruit == 2): vision.take_snapshot(Vision__LIME)
     elif(largestFruit == 3): vision.take_snapshot(Vision__ORANGE_FRUIT)
 
-    idealx = 180
-    idealy = 130
+    idealx = 170
+    idealy = 133
 
     largest = vision.largest_object()
     if (largest is not None):
@@ -208,7 +186,7 @@ def center_fruit():
     effortx = kx*errorx
     efforty = ky*errory
 
-    if(errorx < 5 and errory < 3):
+    if(errorx < 3 and errory < 3):
         horizontalMotor.stop()
         verticalMotor.stop()
         robotstate = ROBOT_APPROACHING
@@ -229,10 +207,10 @@ def handleApproach():
     elif(largestFruit == 2): vision.take_snapshot(Vision__LIME)
     elif(largestFruit == 3): vision.take_snapshot(Vision__ORANGE_FRUIT)
 
-    goalHeight = 180
+    goalHeight = 175
     height = vision.largest_object().height
     heightError = goalHeight-height
-    kh = .6
+    kh = .45
     approachEffort = kh*heightError
 
     if(heightError < 10):
@@ -249,7 +227,7 @@ def handlePick():
     global robotstate
     global pickCount
 
-    verticalMotor.spin_for(FORWARD, 2.5, TURNS, 100, RPM, wait = True)
+    verticalMotor.spin_for(FORWARD, 2, TURNS, 75, RPM, wait = True)
     horizontalMotor.spin_for(REVERSE, horizontalMotor.position(), DEGREES, 100, RPM, wait = True)
 
     pickCount = pickCount + 1
@@ -259,22 +237,26 @@ def handlePick():
 def findLine():
     global robotstate
     global pickCount
+    global fruitpick
     aligned = 0
 
     leftMotor.spin(REVERSE, 50, RPM)
     rightMotor.spin(REVERSE, 50, RPM)
-    if (backLine.reflectivity() > 20):
+    if (backLine.reflectivity() > 12):
         rightMotor.stop()
         leftMotor.stop()
         if(pickCount == 2):
             pickCount = 0
             verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 50, RPM, wait = True)
-            verticalMotor.spin_for(FORWARD, 2, TURNS, 50, RPM, wait = True)
+            # verticalMotor.spin_for(FORWARD, 1, TURNS, 50, RPM, wait = True)
             robotstate = ROBOT_LINING
         else:
-            hDriveMotor.spin_for(FORWARD, 5, TURNS, 75, RPM, wait = False)
-            while hDriveMotor.is_spinning():
-                robotalign()
+            if(fruitpick == 1):
+                hDriveMotor.spin_for(FORWARD, 5, TURNS, 75, RPM, wait = True)
+            else:
+                hDriveMotor.spin_for(REVERSE, 5, TURNS, 75, RPM, wait = True)
+            # while hDriveMotor.is_spinning:
+            #     robotalign()
             leftMotor.stop()
             rightMotor.stop()
             print("fruit 2")
@@ -291,7 +273,7 @@ def handleLine():
     backref = backLine.reflectivity()
 
     referror = frontref-backref #- 4
-    kr = .4
+    kr = .5
     refeffort = kr*referror
 
     print("front:", frontref, "bacK:", backref, "diff:", referror)
@@ -311,35 +293,45 @@ def handleLine():
     if vision.take_snapshot(Vision__PINK_BASKET):
         print("Basket?")
         basket = vision.largest_object()
-        if(abs(basket.originX + basket.width - 150) < 15 and basket.width > 10):
+        if(abs(basket.originX + basket.width - 150) < 15 and basket.width > 15):
+            hDriveMotor.spin_for(FORWARD, 2, TURNS, 150, RPM)
             hDriveMotor.stop()
-            verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 50, RPM, wait = True)
-            verticalMotor.spin_for(FORWARD, 3, TURNS, 50, RPM, wait = True)
+            # verticalMotor.spin_for(REVERSE, verticalMotor.position(), DEGREES, 50, RPM, wait = True)
+            # verticalMotor.spin_for(FORWARD, 1, TURNS, 50, RPM, wait = True)
             robotstate = ROBOT_DROP_OFF
         
 
 def dropFruit():
     global robotstate
     global fruitpick
+    
 
     if(vision.take_snapshot(Vision__PINK_BASKET)): print("PINK!")
     rightMotor.spin(FORWARD, 100, RPM)
     leftMotor.spin(FORWARD, 100, RPM)
+    pinkcount = 0
     if(vision.take_snapshot(Vision__PINK_BASKET) is None):
         print("no basket?")
-        rightMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = False)
-        leftMotor.spin_for(FORWARD, 6.25, TURNS, 100, RPM, wait = True)
+        rightMotor.spin_for(FORWARD, 6.9, TURNS, 100, RPM, wait = False)
+        leftMotor.spin_for(FORWARD, 6.9, TURNS, 100, RPM, wait = True)
         basketMotor.set_stopping(BRAKE)
         print("dropping off")
-        basketMotor.spin(FORWARD, 75, RPM)
+        basketMotor.spin(FORWARD, 90, RPM)
         wait(2000)
         basketMotor.stop()
-        wait(2000, MSEC)
-        basketMotor.spin_for(REVERSE, .4, TURNS, 45, RPM, wait = True)
+        wait(1000)
+        # basketMotor.spin_for(REVERSE, .3, TURNS, 45, RPM, wait = True)
         basketMotor.set_stopping(COAST)
         if(fruitpick >= 4):
             robotstate = ROBOT_IDLE
         else:
+            while(backLine.reflectivity() < 10):
+                leftMotor.spin(REVERSE, 50, RPM)
+                rightMotor.spin(REVERSE, 50, RPM)
+            # rightMotor.spin_for(FORWARD, .5, TURNS, 100, RPM, wait = False)
+            # leftMotor.spin_for(FORWARD, .5, TURNS, 100, RPM, wait = True)
+            rightMotor.stop()
+            leftMotor.stop()
             robotstate = ROBOT_FIND_TREE
 
 
@@ -349,15 +341,14 @@ def linetofruit():
     global Lineconstant
     global fruitpick
 
-    # if(fruitpick == 1): Lineconstant = -1
-    # else: Lineconstant = 1
-    Lineconstant = -1
+    if(fruitpick == 1): Lineconstant = -1
+    else: Lineconstant = 1
 
     frontref = frontLine.reflectivity()
     backref = backLine.reflectivity()
 
-    referror = frontref-backref-5
-    kr = .25
+    referror = frontref-backref#-5
+    kr = .5
     refeffort = kr*referror
 
     print("front:", frontref, "bacK:", backref, "diff:", referror)
@@ -378,12 +369,12 @@ def linetofruit():
                 hDriveMotor.stop()
                 leftMotor.stop()
                 rightMotor.stop()
-                hDriveMotor.spin_for(FORWARD, 3, TURNS, 100, RPM, wait = False)
+                hDriveMotor.spin_for(FORWARD, 1.25, TURNS, 100, RPM, wait = False)
                 while hDriveMotor.is_spinning():
                     robotalign()
                 leftMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = False)
                 rightMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = True)
-                verticalMotor.spin_for(FORWARD, 4.5, TURNS, 100, RPM, wait = True)
+                verticalMotor.spin_for(FORWARD, 2, TURNS, 100, RPM, wait = True)
                 leftMotor.stop()
                 rightMotor.stop()
                 fruitpick += 1
@@ -395,12 +386,12 @@ def linetofruit():
                 hDriveMotor.stop()
                 leftMotor.stop()
                 rightMotor.stop()
-                hDriveMotor.spin_for(FORWARD, 3, TURNS, 100, RPM, wait = False)
-                while hDriveMotor.is_spinning():
-                    robotalign()
+                hDriveMotor.spin_for(REVERSE, 1.25, TURNS, 100, RPM, wait = True)
+                # while hDriveMotor.is_spinning():
+                #     robotalign()
                 leftMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = False)
                 rightMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = True)
-                verticalMotor.spin_for(FORWARD, 4.5, TURNS, 100, RPM, wait = True)
+                verticalMotor.spin_for(FORWARD, 2, TURNS, 100, RPM, wait = True)
                 leftMotor.stop()
                 rightMotor.stop()
                 fruitpick += 1
@@ -412,12 +403,12 @@ def linetofruit():
                 hDriveMotor.stop()
                 leftMotor.stop()
                 rightMotor.stop()
-                hDriveMotor.spin_for(FORWARD, 3, TURNS, 100, RPM, wait = False)
+                hDriveMotor.spin_for(REVERSE, 1.25, TURNS, 100, RPM, wait = False)
                 while hDriveMotor.is_spinning():
                     robotalign()
                 leftMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = False)
                 rightMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = True)
-                verticalMotor.spin_for(FORWARD, 4.5, TURNS, 100, RPM, wait = True)
+                verticalMotor.spin_for(FORWARD, 2, TURNS, 100, RPM, wait = True)
                 leftMotor.stop()
                 rightMotor.stop()
                 fruitpick += 1
