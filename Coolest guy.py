@@ -4,13 +4,13 @@ brain=Brain()
 
 controller = Controller()
 
-Vision__LEMON = Signature (1, 913, 2291, 1602, -4155, -3851, -4003, 2.5, 0)
-Vision__LIME = Signature (2, -6109, -5663, -5886, -4007, -3507, -3757, 2.5, 0)
-Vision__ORANGE_FRUIT = Signature (3, 6301, 7253, 6778, -2387, -2117, -2252, 2.5, 0)
-Vision__PINK_BASKET = Signature (4, 3647, 4317, 3982, 885, 1253, 1069, 3.7, 0)
+Vision__LEMON = Signature (1, 1709, 2161, 1936, -3907, -3711, -3808, 3.6, 0)
+Vision__LIME = Signature (2, -6605, -6003, -6304, -3673, -2977, -3326, 3.9, 0)
+Vision__ORANGE_FRUIT = Signature (3, 7193, 7909, 7551, -2541, -2153, -2347, 3.6, 0)
+Vision__PINK_BASKET = Signature (4, 4843, 5171, 5007, 855, 1253, 1054, 3, 0)
 
 
-vision = Vision(Ports.PORT3, 45, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
+vision = Vision(Ports.PORT3, 28, Vision__LEMON, Vision__LIME, Vision__ORANGE_FRUIT, Vision__PINK_BASKET)
 
 rightMotor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, False)
 leftMotor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, True)
@@ -64,10 +64,8 @@ def handleL1():
         print("idle")
     else:
         pickCount = 0
-        fruitpick = 2
-        robotstate = ROBOT_DROP_OFF
-        # robotstate = ROBOT_LINING
-        # robotstate = ROBOT_FIND_HILL
+        fruitpick = 1
+        robotstate = ROBOT_FIND_HILL
        
 controller.buttonL1.pressed(handleL1)
 
@@ -101,7 +99,7 @@ def lineHill():
     if(frontLine.reflectivity() < 7):
         rightMotor.stop()
         leftMotor.stop()
-        hDriveMotor.spin_for(FORWARD, 10, TURNS, 100, RPM, wait = True)
+        hDriveMotor.spin_for(FORWARD, 12, TURNS, 100, RPM, wait = True)
         robotstate = ROBOT_FIND_ORCHARD
         print("finding the line")
 
@@ -242,7 +240,7 @@ def findLine():
 
     leftMotor.spin(REVERSE, 50, RPM)
     rightMotor.spin(REVERSE, 50, RPM)
-    if (backLine.reflectivity() > 12):
+    if (backLine.reflectivity() > 10):
         rightMotor.stop()
         leftMotor.stop()
         if(pickCount == 2):
@@ -251,8 +249,8 @@ def findLine():
             # verticalMotor.spin_for(FORWARD, 1, TURNS, 50, RPM, wait = True)
             robotstate = ROBOT_LINING
         else:
-            if(fruitpick == 1):
-                hDriveMotor.spin_for(FORWARD, 5, TURNS, 75, RPM, wait = True)
+            if(fruitpick == 2):
+                hDriveMotor.spin_for(FORWARD, 7, TURNS, 75, RPM, wait = True)
             else:
                 hDriveMotor.spin_for(REVERSE, 5, TURNS, 75, RPM, wait = True)
             # while hDriveMotor.is_spinning:
@@ -273,7 +271,9 @@ def handleLine():
     backref = backLine.reflectivity()
 
     referror = frontref-backref #- 4
-    kr = .5
+    # if(abs(referror) > 25): kr = .6
+    # else: 
+    kr = .4
     refeffort = kr*referror
 
     print("front:", frontref, "bacK:", backref, "diff:", referror)
@@ -284,8 +284,8 @@ def handleLine():
 
     if(frontref > 30 and backref > 30):
         hDriveMotor.stop()
-        leftMotor.spin_for(REVERSE, 4.75 * Lineconstant, TURNS, 60, RPM, wait = False)
-        rightMotor.spin_for(FORWARD, 4.75 * Lineconstant, TURNS, 60, RPM, wait = True)
+        leftMotor.spin_for(REVERSE, 4.6 * Lineconstant, TURNS, 60, RPM, wait = False)
+        rightMotor.spin_for(FORWARD, 4.6 * Lineconstant, TURNS, 60, RPM, wait = True)
         hDriveMotor.spin_for(REVERSE, 1 * Lineconstant, TURNS, 100, RPM, wait = True)
         leftMotor.spin_for(FORWARD, 1.25, TURNS, 60, RPM, wait = False)
         rightMotor.spin_for(FORWARD, 1.25, TURNS, 60, RPM, wait = True)
@@ -326,8 +326,8 @@ def dropFruit():
             robotstate = ROBOT_IDLE
         else:
             while(backLine.reflectivity() < 10):
-                leftMotor.spin(REVERSE, 50, RPM)
                 rightMotor.spin(REVERSE, 50, RPM)
+                leftMotor.spin(REVERSE, 50, RPM)
             # rightMotor.spin_for(FORWARD, .5, TURNS, 100, RPM, wait = False)
             # leftMotor.spin_for(FORWARD, .5, TURNS, 100, RPM, wait = True)
             rightMotor.stop()
@@ -348,7 +348,9 @@ def linetofruit():
     backref = backLine.reflectivity()
 
     referror = frontref-backref#-5
-    kr = .5
+    # if(abs(referror) > 25): kr = .5
+    # else: 
+    kr = .4
     refeffort = kr*referror
 
     print("front:", frontref, "bacK:", backref, "diff:", referror)
@@ -369,7 +371,7 @@ def linetofruit():
                 hDriveMotor.stop()
                 leftMotor.stop()
                 rightMotor.stop()
-                hDriveMotor.spin_for(FORWARD, 1.25, TURNS, 100, RPM, wait = False)
+                hDriveMotor.spin_for(FORWARD, 2.5, TURNS, 100, RPM, wait = False)
                 while hDriveMotor.is_spinning():
                     robotalign()
                 leftMotor.spin_for(REVERSE, 2, TURNS, 100, RPM, wait = False)
