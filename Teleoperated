@@ -1,0 +1,129 @@
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+# 	Module:       main.py                                                      #
+# 	Author:       sofiamccarty                                                 #
+# 	Created:      2/26/2025, 11:16:30 AM                                       #
+# 	Description:  V5 project                                                   #
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
+# Library imports
+from vex import *
+
+# Brain should be defined by default
+brain=Brain()
+controller = Controller()
+
+
+brain.screen.print("Hello V5")
+
+
+left_motor = Motor(Ports.PORT11, GearSetting.RATIO_18_1, False)
+right_motor = Motor(Ports.PORT20, GearSetting.RATIO_18_1, True)
+h_motor = Motor(Ports.PORT15, GearSetting.RATIO_18_1, True)
+arm_motor = Motor(Ports.PORT10, GearSetting.RATIO_18_1, False)
+dump_motor = Motor(Ports.PORT12, GearSetting.RATIO_18_1, False)
+
+
+gyro = Gyro(brain.three_wire_port.a)
+
+
+FWD = 1
+TURN = 3
+IDLE = 0
+SIDE = 2
+
+
+dstate = IDLE
+hstate =  IDLE
+
+
+def FWDdrive():
+    global drive_fb
+    h_motor.set_stopping(BRAKE)
+    left_motor.spin(REVERSE, (drive_fb), PERCENT)
+    right_motor.spin(REVERSE, (drive_fb), PERCENT)
+
+
+def TURNdrive():
+    global drive_fb
+    global drive_lr
+    drive_lr = ((controller.axis4.position()/100)*abs((controller.axis4.position()/100))*100)
+
+
+    h_motor.set_stopping(COAST)
+    left_motor.spin(REVERSE, (drive_fb + drive_lr), PERCENT)
+    right_motor.spin(REVERSE, (drive_fb - drive_lr), PERCENT)
+
+
+def hdrive():
+    global deadbandlr
+    global hdrive_lr
+    h_motor.spin(REVERSE, hdrive_lr, PERCENT)
+
+
+gyro.calibrate()
+while gyro.is_calibrating():
+    print("Gyro Sensor is calibrating.")
+    wait(50, MSEC)
+
+
+while True:
+   
+    drive_fb = controller.axis3.position()
+    drive_lr = controller.axis4.position()
+    hdrive_lr = controller.axis2.position()
+
+
+    deadbandlr = 20 #deadzone for controller
+    deadbandfb = 15
+   
+    if abs(hdrive_lr) < deadbandlr:
+                hdrive_lr = 0
+    if abs(drive_lr) < deadbandlr:
+                drive_lr = 0
+    if abs(drive_fb) < deadbandfb:
+                drive_fb = 0
+   
+    if controller.buttonL2.pressing():
+        arm_motor.spin(FORWARD, 20)
+    elif controller.buttonL1.pressing():
+        arm_motor.spin(REVERSE, 20)
+    elif arm_motor.is_spinning():
+        arm_motor.stop()
+
+
+    if controller.buttonR2.pressing():
+        dump_motor.spin(FORWARD, 20)
+    elif controller.buttonR1.pressing():
+        dump_motor.spin(REVERSE, 20)
+    elif arm_motor.is_spinning():
+        dump_motor.stop()
+
+
+
+
+    if drive_lr != 0:
+        TURNdrive()
+    elif drive_fb != 0:
+        FWDdrive()
+    if hdrive_lr != 0:
+        hdrive()
+
+
+    if (drive_fb == 0) and (drive_lr == 0) and (drive_fb == 0):
+        h_motor.stop()
+        right_motor.stop()
+        left_motor.stop()
+
+
+ 
+ 
+    brain.screen.print(drive_lr)
+    brain.screen.print(drive_fb)
+    #controller deadzone
+   
+
+
+
+
